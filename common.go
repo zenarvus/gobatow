@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -13,7 +14,7 @@ func parseHourMinute(HHMM string)int{
 	if HHMM!=""{
 		parsedTime, err := time.Parse("15:04", HHMM)
 		if err != nil {log.Fatal(err)}
-		return parsedTime.Hour()+parsedTime.Minute()
+		return parsedTime.Hour()*100+parsedTime.Minute()
 	}
 	return 0
 }
@@ -23,7 +24,7 @@ var parsedBlockAfterTime = parseHourMinute(blockAfter)
 
 func isPageBlocked(hostname string) (blocked bool){
 	currentDate := time.Now()
-	currentTimeInDay := currentDate.Hour()+currentDate.Minute()
+	currentTimeInDay := currentDate.Hour()*100+currentDate.Minute()
 	if allowBefore != "" {
 		if currentTimeInDay < parsedAllowBeforeTime {
 			return false
@@ -39,6 +40,7 @@ func isPageBlocked(hostname string) (blocked bool){
 	}
 
 	if match && blockAfter!="" && currentTimeInDay > parsedBlockAfterTime {
+		fmt.Println(currentTimeInDay, parsedBlockAfterTime)
 		return true
 	}
 
