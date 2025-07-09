@@ -9,7 +9,7 @@ var allTasksCompleted = true
 func main(){
 	go checkIfTasksCompleted()
 
-	//go QueryServer()
+	go QueryServer()
 	ProxyServer()
 }
 

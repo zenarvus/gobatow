@@ -9,38 +9,26 @@ import (
 	"time"
 )
 
-var parsedAllowBeforeTime = func()int{
-	parsedTime, err := time.Parse("15:04", allowBefore)
-	if err != nil {
-		log.Fatal(err)
+func parseHourMinute(HHMM string)int{
+	if HHMM!=""{
+		parsedTime, err := time.Parse("15:04", HHMM)
+		if err != nil {log.Fatal(err)}
+		return parsedTime.Hour()+parsedTime.Minute()
 	}
-	return parsedTime.Hour()+parsedTime.Minute()
-}()
-var parsedBlockAfterTime = func()int{
-	parsedTime, err := time.Parse("15:04", blockAfter)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return parsedTime.Hour()+parsedTime.Minute()
-}()
+	return 0
+}
+
+var parsedAllowBeforeTime = parseHourMinute(allowBefore)
+var parsedBlockAfterTime = parseHourMinute(blockAfter)
 
 func isPageBlocked(hostname string) (blocked bool){
+	currentDate := time.Now()
+	currentTimeInDay := currentDate.Hour()+currentDate.Minute()
 	if allowBefore != "" {
-		currentDate := time.Now()
-		currentTimeInDay := currentDate.Hour()+currentDate.Minute()
-		if currentTimeInDay > parsedAllowBeforeTime {
-			return true
-		}else{return false}
-	}
-	if blockAfter != "" {
-		currentDate := time.Now()
-		currentTimeInDay := currentDate.Hour()+currentDate.Minute()
-		if currentTimeInDay > parsedBlockAfterTime {
-			return true
+		if currentTimeInDay < parsedAllowBeforeTime {
+			return false
 		}
 	}
-
-	if allTasksCompleted {return false}
 
 	var match = false
 
@@ -50,9 +38,16 @@ func isPageBlocked(hostname string) (blocked bool){
 		}
 	}
 
+	if match && blockAfter!="" && currentTimeInDay > parsedBlockAfterTime {
+		return true
+	}
+
+	if allTasksCompleted {return false}
+
 	if (match && blockType=="blacklist") ||  (!match && blockType=="whitelist") {
 		return true
 	}
+
 	return false
 }
 
